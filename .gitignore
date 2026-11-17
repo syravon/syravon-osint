@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.json
+.env
+
+*.bak
+*.backup
+*.preupdate
+*.before_*
+*.old
+core[0-9]*.py
