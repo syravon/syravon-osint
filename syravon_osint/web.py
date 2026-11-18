@@ -1,0 +1,106 @@
+from flask import Flask, render_template, request, jsonify, send_file
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+import json
+import os
+
+from .core import (
+    domain_report,
+    ip_report,
+    email_domain_report,
+    metadata_report,
+)
+
+app = Flask(__name__)
+
+MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/api/scan", methods=["POST"])
+def scan():
+    try:
+        module = request.form.get("module", "").strip()
+        target = request.form.get("target", "").strip()
+
+        if module == "metadata":
+            uploaded = request.files.get("file") or request.files.get("image")
+
+            if not uploaded or not uploaded.filename:
+                return jsonify({"error": "Please select an image."}), 400
+
+            suffix = Path(uploaded.filename).suffix.lower()
+            if suffix not in {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".webp"}:
+                return jsonify({"error": "Unsupported image type."}), 400
+
+            temp_path = None
+            try:
+                data = uploaded.read(MAX_UPLOAD_SIZE + 1)
+
+                if len(data) > MAX_UPLOAD_SIZE:
+                    return jsonify({"error": "Image exceeds 20 MB limit."}), 413
+
+                with NamedTemporaryFile(
+                    suffix=suffix, delete=False
+                ) as temp_file:
+                    temp_file.write(data)
+                    temp_path = temp_file.name
+
+                result = metadata_report(temp_path)
+            finally:
+                if temp_path and os.path.exists(temp_path):
+                    os.unlink(temp_path)
+
+        else:
+            if not target:
+                return jsonify({"error": "Target is required."}), 400
+
+            functions = {
+                "domain": domain_report,
+                "ip": ip_report,
+                "email-domain": email_domain_report,
+            }
+
+            if module not in functions:
+                return jsonify({"error": "Invalid scan module."}), 400
+
+            result = functions[module](target)
+
+        return jsonify({"result": result})
+
+    except (ValueError, OSError) as exc:
+        return jsonify({"error": str(exc)}), 400
+    except Exception:
+        app.logger.exception("Unexpected scan error")
+        return jsonify({"error": "Scan failed. Check server logs."}), 500
+
+
+@app.route("/api/report", methods=["POST"])
+def download_report():
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict) or "result" not in data:
+        return jsonify({"error": "Invalid report data."}), 400
+
+    report = json.dumps(
+        data["result"],
+        indent=2,
+        ensure_ascii=False,
+        default=str
+    ).encode("utf-8")
+
+    return send_file(
+        __import__("io").BytesIO(report),
+        mimetype="application/json",
+        as_attachment=True,
+        download_name="syravon-osint-report.json"
+    )
+
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=False)

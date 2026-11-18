@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYRAVON OSINT</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #080d18;
+            color: #e8eefc;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid #24334e;
+            background: #101a2d;
+        }
+        header h1 {
+            margin: 0;
+            color: #55aaff;
+            letter-spacing: 3px;
+        }
+        header p { color: #9aabc5; }
+        main {
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+        .panel {
+            background: #111c30;
+            border: 1px solid #263a5b;
+            border-radius: 12px;
+            padding: 25px;
+        }
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            color: #b9c9e5;
+        }
+        select, input {
+            width: 100%;
+            padding: 13px;
+            border-radius: 7px;
+            border: 1px solid #344967;
+            background: #091426;
+            color: white;
+        }
+        button {
+            margin-top: 22px;
+            padding: 13px 22px;
+            border: 0;
+            border-radius: 7px;
+            background: #1685e8;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background: #0868bd; }
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: #070d18;
+            padding: 18px;
+            border-radius: 8px;
+            color: #9ee7bd;
+            overflow-x: auto;
+        }
+        #result { display: none; margin-top: 25px; }
+        #status { color: #ffc66d; margin-top: 15px; }
+        footer {
+            text-align: center;
+            color: #71829e;
+            padding: 25px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SYRAVON OSINT</h1>
+        <p>Open Source Intelligence Toolkit | Web Interface</p>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Intelligence Scanner</h2>
+
+            <form id="scanForm">
+                <label for="module">Select Module</label>
+                <select id="module" name="module">
+                    <option value="domain">Domain Reconnaissance</option>
+                    <option value="ip">IP Intelligence</option>
+                    <option value="email-domain">Email Domain Security</option>
+                    <option value="metadata">Image Metadata Analysis</option>
+                </select>
+
+                <div id="targetGroup">
+                    <label for="target">Target</label>
+                    <input id="target" name="target"
+                           placeholder="example.com" autocomplete="off">
+                </div>
+
+                <div id="fileGroup" hidden>
+                    <label for="file">Select Image</label>
+                    <input id="file" name="file" type="file"
+                           accept=".jpg,.jpeg,.png,.tif,.tiff,.webp">
+                </div>
+
+                <button type="submit" id="scanButton">Start Scan</button>
+            </form>
+
+            <p id="status" role="status"></p>
+
+            <div id="result">
+                <h3>Scan Report</h3>
+                <pre id="output"></pre>
+                <button type="button" id="downloadButton">
+                    Download JSON Report
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer>SYRAVON Cybersecurity | Use only on authorized targets</footer>
+
+    <script>
+        const form = document.getElementById("scanForm");
+        const moduleSelect = document.getElementById("module");
+        const targetGroup = document.getElementById("targetGroup");
+        const fileGroup = document.getElementById("fileGroup");
+        const targetInput = document.getElementById("target");
+        const fileInput = document.getElementById("file");
+        const statusBox = document.getElementById("status");
+        const resultBox = document.getElementById("result");
+        const output = document.getElementById("output");
+        const scanButton = document.getElementById("scanButton");
+        const downloadButton = document.getElementById("downloadButton");
+
+        let lastReport = null;
+
+        moduleSelect.addEventListener("change", () => {
+            const isMetadata = moduleSelect.value === "metadata";
+            targetGroup.hidden = isMetadata;
+            fileGroup.hidden = !isMetadata;
+            targetInput.required = !isMetadata;
+            fileInput.required = isMetadata;
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const data = new FormData();
+            data.append("module", moduleSelect.value);
+
+            if (moduleSelect.value === "metadata") {
+                if (!fileInput.files.length) {
+                    statusBox.textContent = "Please select an image.";
+                    return;
+                }
+                data.append("file", fileInput.files[0]);
+            } else {
+                if (!targetInput.value.trim()) {
+                    statusBox.textContent = "Please enter a target.";
+                    return;
+                }
+                data.append("target", targetInput.value.trim());
+            }
+
+            scanButton.disabled = true;
+            statusBox.textContent = "Scan in progress...";
+            resultBox.style.display = "none";
+
+            try {
+                const response = await fetch("/api/scan", {
+                    method: "POST",
+                    body: data
+                });
+
+                const report = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(report.error || "Scan failed.");
+                }
+
+                lastReport = report;
+                output.textContent = JSON.stringify(report, null, 2);
+                resultBox.style.display = "block";
+                statusBox.textContent = "Scan completed.";
+            } catch (error) {
+                statusBox.textContent = "Error: " + error.message;
+            } finally {
+                scanButton.disabled = false;
+            }
+        });
+
+        downloadButton.addEventListener("click", async () => {
+            if (!lastReport) return;
+
+            try {
+                const response = await fetch("/api/report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(lastReport)
+                });
+
+                if (!response.ok) throw new Error("Download failed.");
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "syravon-osint-report.json";
+                link.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                statusBox.textContent = "Error: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
