@@ -10,3 +10,7 @@ __pycache__/
 *.before_*
 *.old
 core[0-9]*.py
+
+# Local web runtime files
+.syravon-web.pid
+web.log

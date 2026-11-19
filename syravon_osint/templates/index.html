@@ -69,7 +69,15 @@
             overflow-x: auto;
         }
         #result { display: none; margin-top: 25px; }
-        #status { color: #ffc66d; margin-top: 15px; }
+        #status { color: #ffc66d; margin-top: 15px; min-height: 22px; }
+        button:disabled { opacity: .65; cursor: wait; }
+        [hidden] { display: none !important; }
+        @media (max-width: 600px) {
+            main { margin: 18px auto; padding: 12px; }
+            .panel { padding: 18px; }
+            header { padding: 20px 12px; }
+            header h1 { font-size: 25px; }
+        }
         footer {
             text-align: center;
             color: #71829e;
@@ -169,8 +177,12 @@
             }
 
             scanButton.disabled = true;
+            const originalButtonText = scanButton.textContent;
+            scanButton.textContent = "Scanning...";
             statusBox.textContent = "Scan in progress...";
             resultBox.style.display = "none";
+            lastReport = null;
+            const startedAt = performance.now();
 
             try {
                 const response = await fetch("/api/scan", {
@@ -178,20 +190,27 @@
                     body: data
                 });
 
-                const report = await response.json();
+                let report;
+                try {
+                    report = await response.json();
+                } catch {
+                    throw new Error("The server returned an invalid response.");
+                }
 
                 if (!response.ok) {
                     throw new Error(report.error || "Scan failed.");
                 }
 
+                const elapsedSeconds = ((performance.now() - startedAt) / 1000).toFixed(2);
                 lastReport = report;
                 output.textContent = JSON.stringify(report, null, 2);
                 resultBox.style.display = "block";
-                statusBox.textContent = "Scan completed.";
+                statusBox.textContent = `Scan completed in ${elapsedSeconds} seconds.`;
             } catch (error) {
                 statusBox.textContent = "Error: " + error.message;
             } finally {
                 scanButton.disabled = false;
+                scanButton.textContent = originalButtonText;
             }
         });
 
@@ -213,7 +232,7 @@
                 link.href = url;
                 link.download = "syravon-osint-report.json";
                 link.click();
-                URL.revokeObjectURL(url);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
             } catch (error) {
                 statusBox.textContent = "Error: " + error.message;
             }
