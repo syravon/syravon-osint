@@ -1,160 +1,152 @@
 # SYRAVON OSINT Toolkit
 
-**Version:** 1.0.0  
-**Project:** SYRAVON Cybersecurity  
-**Type:** Defensive, public-source OSINT command-line toolkit
+**A Python-based Open Source Intelligence toolkit with CLI and Web Interface.**
 
-SYRAVON OSINT is a Python-based CLI tool for collecting basic technical information from public-facing domains and IP addresses, checking domain-level email configuration, and inspecting metadata in image files supplied by the user.
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Web-Flask-lightgrey)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> Use the toolkit only for systems, domains, IP addresses, email domains, and files that you own or have explicit permission to assess.
+SYRAVON OSINT is a defensive OSINT toolkit designed to collect basic technical information from public-facing domains and IP addresses, inspect domain-level email security configuration, and extract metadata from user-provided files and images.
+
+Use this toolkit only on systems, domains, IP addresses, email domains, and files that you own or are explicitly authorized to assess.
 
 ## Features
 
-### 1. Domain reconnaissance
+### 1. Domain Reconnaissance
 - DNS records: A, AAAA, MX, and TXT
 - TLS certificate summary
-- HTTPS response status and selected security-related response headers
-- Security-header presence checks for:
+- HTTPS response status
+- Selected security-related HTTP response headers
+- Security-header presence checks:
   - HTTP Strict Transport Security (HSTS)
   - Content Security Policy (CSP)
   - X-Frame-Options
   - X-Content-Type-Options
   - Referrer-Policy
 
-Header checks are informational. A missing header is not, by itself, proof of an exploitable vulnerability.
-
-### 2. IP address lookup
+### 2. IP Intelligence
 - IP address classification
+- Public/private and reserved address indicators
 - Reverse DNS lookup
-- Public RDAP registration summary
+- Basic network and allocation information when available
 
-RDAP lookups are limited to globally routable public IP addresses. Private, loopback, link-local, and other non-global addresses are not sent for public RDAP lookup.
+### 3. Email Domain Security
+- MX record inspection
+- SPF record lookup
+- DMARC record lookup
+- Domain-level email security configuration checks
 
-### 3. Email-domain checks
-- MX record lookup
-- SPF record check
-- DMARC record check
+*These checks inspect public DNS configuration. They do not verify mailbox existence or guarantee email deliverability.*
 
-These are domain-level configuration checks. The tool does not verify individual mailboxes or send email.
+### 4. File Metadata Inspection
+- Extract metadata from supported image and file inputs
+- Inspect image properties and available EXIF information
+- Generate structured JSON reports
 
-### 4. Image metadata inspection
-- Basic image information
-- Available EXIF metadata from a user-provided image
+## Interfaces
 
-Only inspect files you own or are authorized to examine.
+### Command-Line Interface (CLI)
+Run reconnaissance modules directly from your terminal.
 
-### 5. JSON reports
-Export supported scan results to a JSON file using `--json`.
-
-## Requirements
-
-- Python 3.10 or newer
-- pip
-- Internet access for DNS, RDAP, and domain TLS/HTTPS lookups
+### Web Interface
+Use the Flask-based web interface to:
+- Select a scanning module
+- Enter a target or upload a supported file
+- View scan results
+- Download JSON reports
 
 ## Installation
-
-Clone the repository:
 
 ```bash
 git clone https://github.com/syravon/syravon-osint.git
 cd syravon-osint
+
+python -m venv .venv
 ```
 
-Create and activate a virtual environment.
+Activate the virtual environment:
 
-**Kali Linux / Linux / macOS**
+**Windows**
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+.venv\Scripts\activate
 ```
 
-**Windows PowerShell**
-```powershell
-py -m venv .venv
-.venv\\Scripts\\Activate.ps1
+**Linux / Kali**
+```bash
+source .venv/bin/activate
 ```
 
 Install dependencies:
 
 ```bash
-python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Usage
-
-Show available commands:
+## Run the Web Interface
 
 ```bash
-python -m syravon_osint --help
+python -m syravon_osint.web
 ```
 
-Check a domain you are authorized to assess:
+Open your browser at:
 
+```text
+http://127.0.0.1:5000
+```
+
+## Deployment
+
+The web application can be deployed on compatible Python hosting platforms using:
+
+**Build command**
 ```bash
-python -m syravon_osint domain example.com
+pip install -r requirements.txt
 ```
 
-Look up a public IP address:
-
+**Start command**
 ```bash
-python -m syravon_osint ip 8.8.8.8
+gunicorn syravon_osint.web:app
 ```
 
-Check email-domain DNS configuration:
-
-```bash
-python -m syravon_osint email-domain example.com
-```
-
-Inspect an image file:
-
-```bash
-python -m syravon_osint metadata ./image.jpg
-```
-
-Export a domain report as JSON:
-
-```bash
-python -m syravon_osint domain example.com --json domain-report.json
-```
-
-Replace the example domain, IP address, and image path with values you are authorized to assess.
-
-## Responsible use and limitations
-
-- Obtain permission before running domain or IP checks against systems you do not own.
-- The toolkit performs basic information gathering; it is not a penetration-testing or vulnerability-exploitation framework.
-- It does not exploit vulnerabilities, access private accounts, track people, locate phones, or discover passwords.
-- Public RDAP data can be incomplete, inaccurate, or redacted.
-- DNS, TLS, and HTTPS results can vary with network conditions, DNS configuration, and server behavior.
-- Security-header checks cover only the selected response headers. They are not a complete website security audit or a vulnerability score.
-- Image metadata may be absent, stripped, or incomplete.
-
-## Project structure
+## Project Structure
 
 ```text
 syravon-osint/
+├── .github/
+│   └── workflows/
 ├── syravon_osint/
-│   ├── __init__.py
-│   ├── __main__.py
-│   └── core.py
-├── .gitignore
-├── LICENSE
 ├── README.md
-└── requirements.txt
+├── LICENSE
+├── requirements.txt
+└── run-web.sh
 ```
 
-## Roadmap
+## Responsible Use
 
-Planned future work may include:
-- A web interface for running authorized checks
-- A separately hosted backend for Python-based scanning
-- Improved report presentation and additional defensive checks
+SYRAVON OSINT is intended for educational, defensive, and authorized security assessment purposes.
 
-GitHub Pages can host static website content, but it cannot directly execute this Python CLI. A future web interface will therefore require a suitable backend service.
+- Scan only authorized targets.
+- Respect privacy, applicable laws, and service terms.
+- Do not use the toolkit to access systems without permission.
+- Results are informational and may be incomplete or change over time.
+
+## Limitations
+
+- DNS and network information depends on publicly available records and service responses.
+- IP geolocation and allocation data may be incomplete or unavailable.
+- Security-header checks are informational and do not constitute a full security audit.
+- Metadata availability depends on the uploaded file and the metadata embedded in it.
 
 ## License
 
-See [LICENSE](LICENSE) for the terms of use.
+This project is distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## Author
+
+**SYRAVON Cybersecurity**
+
+GitHub: [@syravon](https://github.com/syravon)
+
+---
+
+**SYRAVON OSINT — Open Source Intelligence Toolkit**
