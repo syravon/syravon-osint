@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, jsonify, send_file
+
+from flask import Flask, render_template, request, jsonify, send_file, Response
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+import hmac
 import json
 import os
 
@@ -15,6 +17,29 @@ app = Flask(__name__)
 
 MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
+
+
+@app.before_request
+def require_basic_auth():
+    expected_user = os.environ.get("SYRAVON_USERNAME")
+    expected_password = os.environ.get("SYRAVON_PASSWORD")
+
+    if not expected_user or not expected_password:
+        app.logger.error("Authentication environment variables are missing.")
+        return jsonify({"error": "Service authentication is not configured."}), 503
+
+    supplied = request.authorization
+    if (
+        supplied is None
+        or supplied.type.lower() != "basic"
+        or not hmac.compare_digest(supplied.username or "", expected_user)
+        or not hmac.compare_digest(supplied.password or "", expected_password)
+    ):
+        return Response(
+            "Authentication required.",
+            401,
+            {"WWW-Authenticate": 'Basic realm="SYRAVON OSINT", charset="UTF-8"'},
+        )
 
 
 @app.route("/")
@@ -45,9 +70,7 @@ def scan():
                 if len(data) > MAX_UPLOAD_SIZE:
                     return jsonify({"error": "Image exceeds 20 MB limit."}), 413
 
-                with NamedTemporaryFile(
-                    suffix=suffix, delete=False
-                ) as temp_file:
+                with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
                     temp_file.write(data)
                     temp_path = temp_file.name
 
