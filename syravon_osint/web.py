@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, jsonify, send_file, Response
+from flask import Flask, render_template, request, jsonify, send_file
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 import hmac
 import json
 import os
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from .core import (
     domain_report,
@@ -13,6 +15,16 @@ from .core import (
 )
 
 app = Flask(__name__)
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-secret-key")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = True
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per hour"]
+)
 
 MAX_UPLOAD_SIZE = 20 * 1024 * 1024
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE
@@ -47,6 +59,7 @@ def index():
 
 
 @app.route("/api/scan", methods=["POST"])
+@limiter.limit("10 per minute")
 def scan():
     try:
         module = request.form.get("module", "").strip()
