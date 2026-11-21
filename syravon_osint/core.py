@@ -136,6 +136,7 @@ def domain_report(target):
 
     try:
         context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
         with socket.create_connection((domain, 443), timeout=4) as raw_socket:
             with context.wrap_socket(raw_socket, server_hostname=domain) as tls_socket:
                 certificate = tls_socket.getpeercert()
