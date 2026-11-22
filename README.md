@@ -1,133 +1,168 @@
 # 🛡️ SYRAVON OSINT Toolkit
 
-### A Python-Based Open Source Intelligence Toolkit with CLI & Web Interface
-
 <p align="center">
   <img src="syravon-logo.png" alt="SYRAVON OSINT Logo" width="180">
 </p>
 
 <p align="center">
-  <a href="https://syravon-osint.onrender.com/"><strong>🚀 Launch Live Web App</strong></a>
+  **A Python-based OSINT toolkit for authorized defensive research**
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python">
-  <img src="https://img.shields.io/badge/Web-Flask-black" alt="Flask">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
-  <img src="https://img.shields.io/badge/Version-1.0.0-blueviolet" alt="Version">
+  <a href="https://syravon-osint.onrender.com/"><strong>🚀 Open Live Web Application</strong></a>
+</p>
+
+<p align="center">
+  ![Python](https://img.shields.io/badge/Python-3-blue)
+  ![Flask](https://img.shields.io/badge/Framework-Flask-black)
+  ![License](https://img.shields.io/badge/License-MIT-green)
+  ![Version](https://img.shields.io/badge/Version-1.0.0-blueviolet)
 </p>
 
 ---
 
 ## 🌐 Live Web Application
 
-Try SYRAVON OSINT directly from your browser:
+**Live URL:** https://syravon-osint.onrender.com/
 
-### 👉 https://syravon-osint.onrender.com/
+SYRAVON OSINT is deployed on Render and provides a browser-based interface for its OSINT modules.
 
-The web interface allows users to:
-- Select an OSINT scanning module.
-- Enter a target or upload a supported file.
-- Run scans through the web interface.
-- View structured scan results.
-- Download JSON reports.
+**Access note:** The hosted application is protected by HTTP Basic Authentication. Login credentials are provided separately by the project operator and are not published in this repository.
 
-*Note: The free hosting service may take a short time to wake up after inactivity.*
+> Note: The Render free instance may sleep after inactivity. The first request may take some time to respond.
 
 ---
 
-## 📖 About
+## 📖 About the Project
 
-**SYRAVON OSINT** is a Python-based defensive Open Source Intelligence (OSINT) toolkit developed by **SYRAVON Cybersecurity**.
+**SYRAVON OSINT** is a Python-based Open Source Intelligence toolkit designed for educational, defensive, and authorized security research.
 
-It collects basic technical information from public-facing domains and IP addresses, checks domain-level email security configuration, and extracts metadata from user-provided files and images.
+It provides selected public technical information about domains and IP addresses, checks domain-level email security records, and inspects metadata in user-provided images.
 
-The project provides both a Command-Line Interface (CLI) and a Flask-based Web Interface.
+The project includes:
+- Command-Line Interface (CLI)
+- Flask-based Web Interface
+- Structured JSON output
+- JSON report download from the web interface
+- Authentication and rate limiting for the hosted web application
 
-Use this toolkit only on systems, domains, IP addresses, email domains, and files that you own or are explicitly authorized to assess.
+This toolkit is not a full vulnerability scanner, mailbox verifier, or user-attribution tool.
 
 ---
 
 ## ✨ Features
 
-### 1. 🌍 Domain Reconnaissance
-- DNS record lookup: A, AAAA, MX, and TXT
+### 🌍 1. Domain Reconnaissance
+- DNS A, AAAA, MX, and TXT record lookups
 - TLS certificate information
 - HTTPS response status
-- Selected HTTP security headers
-- Security-header presence checks:
-  - HTTP Strict Transport Security (HSTS)
-  - Content Security Policy (CSP)
+- Selected HTTP security headers:
+  - HSTS
+  - Content-Security-Policy
   - X-Frame-Options
   - X-Content-Type-Options
   - Referrer-Policy
+- Basic security-header presence summary
 
-### 2. 🌐 IP Intelligence
-- IP address classification
-- Public, private, and reserved address indicators
-- Reverse DNS lookup
-- Basic network and allocation information when available
+### 🌐 2. IP Intelligence
+- IPv4 and IPv6 address validation
+- Public/private address classification
+- Loopback, multicast, and reserved address indicators
+- Reverse DNS lookup for globally routable IP addresses
+- RDAP network allocation information when available
 
-### 3. 📧 Email Domain Security
+### 📧 3. Email Domain Security
 - MX record inspection
 - SPF record lookup
 - DMARC record lookup
-- Domain-level email security configuration checks
 
-*These checks inspect public DNS configuration. They do not verify mailbox existence or guarantee email deliverability.*
+These checks inspect domain-level DNS configuration. They do not verify whether a mailbox exists or identify its owner.
 
-### 4. 🖼️ File Metadata Inspection
-- Extract metadata from supported image and file inputs
-- Inspect image properties and available EXIF information
-- Generate structured JSON reports
+### 🖼️ 4. Image Metadata Analysis
+- Image format
+- Image dimensions
+- Color mode
+- Available EXIF metadata
+
+Supported image formats in the web upload:
+- JPG / JPEG
+- PNG
+- TIFF
+- WEBP
+
+Maximum image upload size: **20 MB**.
+
+### 📄 5. JSON Reports
+- Structured JSON output from CLI commands
+- JSON report download from the web interface
+- Timestamped scan results
 
 ---
 
-## 🖥️ Interfaces
+## 🖥️ Command-Line Usage
 
-### Command-Line Interface (CLI)
+### Available Commands
 
-Run reconnaissance modules directly from your terminal.
+```bash
+python -m syravon_osint domain example.com
+```
 
-### Web Interface
+```bash
+python -m syravon_osint ip 8.8.8.8
+```
 
-Use the online or locally hosted Flask web interface to:
-- Select a scanning module
-- Enter a target or upload a supported file
-- View scan results
-- Download JSON reports
+```bash
+python -m syravon_osint email-domain example.com
+```
+
+```bash
+python -m syravon_osint metadata ./photo.jpg
+```
+
+### Save a JSON Report
+
+Add `--json` followed by the output filename:
+
+```bash
+python -m syravon_osint domain example.com --json report.json
+```
 
 ---
 
 ## ⚙️ Installation
 
 ### Requirements
-- Python 3.11 or newer
+- Python
 - Git
-- Internet connection for network-based scans
+- Internet connection for network-based lookups
 
-### 1. Clone the Repository
+### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/syravon/syravon-osint.git
+```
+
+```bash
 cd syravon-osint
 ```
 
-### 2. Create a Virtual Environment
+### Step 2: Create a Virtual Environment
 
-**Windows:**
-```bash
+**Windows PowerShell:**
+
+```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1
 ```
 
 **Linux / Kali Linux:**
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### Step 3: Install Dependencies
 
 ```bash
 python -m pip install --upgrade pip
@@ -136,22 +171,21 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 Run the Web Interface Locally
+## 🚀 Run the Web Application Locally
 
-**Linux / Kali Linux:**
+From the project root directory:
 
 ```bash
-chmod +x run-web.sh
-./run-web.sh
+python -m syravon_osint.web
 ```
 
-The local web interface runs at:
+Open your browser:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-For deployment with Gunicorn:
+For a Gunicorn run:
 
 ```bash
 gunicorn syravon_osint.web:app
@@ -159,17 +193,49 @@ gunicorn syravon_osint.web:app
 
 ---
 
-## 📦 Project Structure
+## 🔐 Web Application Security
+
+The Flask web application includes:
+
+- HTTP Basic Authentication
+- Constant-time credential comparison
+- Flask-Limiter request rate limiting
+- Default application limit: 100 requests per hour
+- Scan endpoint limit: 10 requests per minute
+- Maximum image upload size: 20 MB
+- Secure session cookie settings
+
+### Environment Variables
+
+Configure the following variables in your deployment environment:
+
+| Variable | Purpose |
+|---|---|
+| `SECRET_KEY` | Flask secret key |
+| `SYRAVON_USERNAME` | Web application username |
+| `SYRAVON_PASSWORD` | Web application password |
+| `RATELIMIT_STORAGE_URI` | Rate-limit storage backend URI |
+
+For production deployments, configure a reachable Redis service using `RATELIMIT_STORAGE_URI` so rate-limit data can be shared and persisted.
+
+**Never publish passwords, secret keys, or Redis connection URLs in source code, screenshots, or README files.**
+
+---
+
+## 📁 Project Structure
 
 ```text
 syravon-osint/
 │
 ├── .github/
-│   └── workflows/
-│
 ├── syravon_osint/
+│   ├── templates/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── core.py
 │   └── web.py
 │
+├── tests/
 ├── .gitignore
 ├── LICENSE
 ├── README.md
@@ -180,54 +246,40 @@ syravon-osint/
 
 ---
 
-## 📊 Reports
-
-SYRAVON OSINT provides structured JSON scan reports.
-
-Reports include available scan results, target information, module details, and generation timestamps.
-
-The Web Interface provides a JSON report download option.
-
----
-
 ## ☁️ Deployment
 
-The Web Interface is deployed using **Render**.
+The hosted web application runs on **Render** using Flask and Gunicorn.
 
-- Hosting: Render
-- Framework: Flask
-- Production server: Gunicorn
-- Source repository: GitHub
+- **GitHub Repository:** https://github.com/syravon/syravon-osint
+- **Live Application:** https://syravon-osint.onrender.com/
 
-**Live URL:** https://syravon-osint.onrender.com/
+The deployed application requires valid authentication credentials.
 
 ---
 
-## 🔐 Responsible Use & Disclaimer
+## ⚠️ Responsible Use & Disclaimer
 
-SYRAVON OSINT is intended for educational, defensive cybersecurity, and authorized security assessment purposes.
+SYRAVON OSINT is intended only for:
+- Authorized security testing
+- Educational purposes
+- Defensive cybersecurity research
+- Analysis of systems and files you own or have permission to inspect
 
-- Only scan targets you own or have explicit permission to assess.
-- Do not use this tool for unauthorized reconnaissance.
-- Public DNS and network information may be incomplete or outdated.
-- Results are informational and should be independently verified.
-- The developer is not responsible for misuse or damage resulting from unauthorized use.
+Do not use this toolkit for unauthorized reconnaissance, privacy violations, or illegal activities.
 
----
+Public DNS, RDAP, and network information may be incomplete or unavailable. Results are informational and should be independently verified.
 
-## 🧪 Testing
+Image metadata may contain sensitive information. Review reports before sharing them.
 
-The project has been tested on:
-- Kali Linux
-- Windows
-
-Cross-platform checks are also configured through GitHub Actions.
+The developer is not responsible for misuse or damage resulting from unauthorized use of this software.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
+
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -235,16 +287,12 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 **SYRAVON Cybersecurity**
 
-GitHub: https://github.com/syravon
-
-Project: https://github.com/syravon/syravon-osint
-
-Live Web App: https://syravon-osint.onrender.com/
-
----
+- GitHub: https://github.com/syravon
+- Project Repository: https://github.com/syravon/syravon-osint
+- Live Web Application: https://syravon-osint.onrender.com/
 
 <p align="center">
-  <strong>SYRAVON OSINT — Intelligence. Security. Awareness.</strong>
+  **SYRAVON OSINT — Intelligence. Security. Awareness.**
 </p>
 
 <p align="center">
