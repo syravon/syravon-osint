@@ -13,10 +13,12 @@
 </p>
 
 <p align="center">  
+
 [![Python](https://img.shields.io/badge/Python-3-blue)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask-black)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-blueviolet)](https://github.com/syravon/syravon-osint)
+
 </p>
 
 ---
