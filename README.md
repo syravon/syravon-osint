@@ -12,14 +12,22 @@
   <a href="https://syravon-osint.onrender.com/"><strong>🚀 Open Live Web Application</strong></a>
 </p>
 
-<p align="center">  
 
-[![Python](https://img.shields.io/badge/Python-3-blue)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Framework-Flask-black)](https://flask.palletsprojects.com/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-blueviolet)](https://github.com/syravon/syravon-osint)
-
+<p align="center">
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3-blue" alt="Python">
+  </a>
+  <a href="https://flask.palletsprojects.com/">
+    <img src="https://img.shields.io/badge/Framework-Flask-black" alt="Flask">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  </a>
+  <a href="https://github.com/syravon/syravon-osint">
+    <img src="https://img.shields.io/badge/Version-1.0.0-blueviolet" alt="Version">
+  </a>
 </p>
+
 
 ---
 
