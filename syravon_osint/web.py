@@ -23,7 +23,8 @@ app.config["SESSION_COOKIE_SECURE"] = True
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["100 per hour"]
+    default_limits=["100 per hour"],
+    storage_uri=os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 )
 
 MAX_UPLOAD_SIZE = 20 * 1024 * 1024
